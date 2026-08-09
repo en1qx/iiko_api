@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>iiko API</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div><strong>iiko API</strong><span>API запросы из браузера</span></div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="ghost" id="helpButton" style="font-size: 20px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">❓</button>
+      <button class="ghost" id="loginsButton">API-логины</button>
+    </div>
+  </header>
+  <main>
+    <aside>
+      <div class="tabs" id="tabs"></div>
+      <div id="session"></div>
+      <nav id="actions"></nav>
+    </aside>
+    <section class="result-panel">
+      <div class="result-head">
+        <div>
+          <span class="eyebrow">ОТВЕТ API</span>
+          <h1 id="resultTitle">Готов к запросу</h1>
+        </div>
+        <div class="view-switch">
+          <button data-view="friendly" class="active">Удобный вид</button>
+          <button data-view="json">JSON</button>
+          <button id="exportJsonButton" title="Выгрузить результат">Выгрузить</button>
+        </div>
+      </div>
+      <div id="result" class="empty">Выбери метод слева, заполни поля и отправь запрос.</div>
+    </section>
+  </main>
+  
+  <dialog id="loginsDialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <h2>Набор API-логинов</h2>
+        <button class="ghost">Закрыть</button>
+      </div>
+      <div class="dialog-body">
+        <div class="tabs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0;">
+          <button data-login-tab="transport" class="active">🚀 Transport</button>
+          <button data-login-tab="yandex">🔑 Яндекс / Магнит</button>
+        </div>
+        <p>Логины хранятся в браузере этого устройства.</p>
+        <label class="field" style="margin-bottom: 10px;">
+          <span style="font-size: 12px; color: var(--muted);">Поиск по логинам</span>
+          <input id="loginSearch" autocomplete="off" placeholder="Название или логин…" style="width: 100%;">
+        </label>
+        <div id="savedLogins"></div>
+        <hr>
+        <div id="loginFormFields">
+          <label>Название / Подпись
+            <input id="loginLabel" placeholder="Название">
+          </label>
+          <label>API-логин
+            <input id="loginValue" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+          </label>
+        </div>
+        <button id="saveLogin" type="button">Добавить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <h2>📖 О проекте</h2>
+        <button class="ghost">Закрыть</button>
+      </div>
+      <div class="dialog-body" id="helpContent" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+        <div style="color: var(--muted);">Загрузка документации...</div>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

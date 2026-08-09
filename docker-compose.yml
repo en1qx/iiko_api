@@ -1,0 +1,15 @@
+networks:
+  monitoring:
+    external: true
+    name: docker_monitoring
+
+services:
+  iiko-api-panel:
+    build: .
+    container_name: iiko-api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
