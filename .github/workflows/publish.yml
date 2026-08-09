@@ -44,3 +44,26 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.version=${{ github.ref_name }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy application
+        run: |
+          ssh \
+            -p "${{ secrets.DEPLOY_PORT }}" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "/opt/docker/iikoApi/deploy.sh ${GITHUB_REF_NAME}"
