@@ -263,22 +263,18 @@ textarea {
   color: #a8d0e8;
 }
 
+/* JSON стили с линиями */
 .json {
   margin: 0;
   overflow: auto;
-<<<<<<< HEAD
   white-space: pre;
-=======
-  white-space: pre-wrap;
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
   word-break: break-word;
   background: rgba(10, 30, 20, 0.7);
   padding: 18px;
   border-radius: 10px;
   border: 1px solid rgba(40, 80, 60, 0.4);
   color: #d8ecd4;
-<<<<<<< HEAD
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
   font-size: 13px;
   line-height: 1.6;
   tab-size: 2;
@@ -295,11 +291,26 @@ textarea {
 .json .json-line.depth-3 { border-left-color: rgba(100, 180, 130, 0.4); }
 .json .json-line.depth-4 { border-left-color: rgba(100, 180, 130, 0.5); }
 .json .json-line.depth-5 { border-left-color: rgba(100, 180, 130, 0.6); }
+.json .json-line.depth-6 { border-left-color: rgba(100, 180, 130, 0.7); }
+.json .json-line.depth-7 { border-left-color: rgba(100, 180, 130, 0.8); }
+.json .json-line.depth-8 { border-left-color: rgba(100, 180, 130, 0.9); }
 
-=======
+/* Подсветка совпадений в JSON */
+.json-match {
+  background: #ffeb3b;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
+.json-match:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+}
+
+/* Карточки */
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -327,9 +338,25 @@ textarea {
 }
 
 .card dl { margin: 0; }
-.card dt { font-size: 11px; text-transform: uppercase; color: var(--muted); margin-top: 7px; }
-.card dd { margin: 1px 0; word-break: break-word; }
+.card dt { 
+  font-size: 11px; 
+  text-transform: uppercase; 
+  color: var(--muted); 
+  margin-top: 7px; 
+}
+.card dd { 
+  margin: 1px 0; 
+  word-break: break-word; 
+}
 
+/* Выделение цены жирным */
+.card dd.price-highlight {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+/* Загрузка */
 .loading {
   display: flex;
   align-items: center;
@@ -350,6 +377,7 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
+/* Ошибки */
 .error-container {
   background: rgba(239, 170, 160, 0.15);
   border: 1px solid var(--danger);
@@ -374,6 +402,7 @@ textarea {
   font-size: 12px;
 }
 
+/* Диалоги */
 dialog {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -496,10 +525,41 @@ hr {
   padding-left: 20px;
 }
 
+/* Адаптивность */
 @media(max-width:800px) {
   main { grid-template-columns: 1fr; }
   .result-panel { padding: 20px; }
   aside { border-right: 0; border-bottom: 1px solid var(--line); }
   .result-head { flex-direction: column; }
   .tabs { max-width: 430px; }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Скроллбар для JSON */
+.json::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.json::-webkit-scrollbar-track {
+  background: rgba(10, 30, 20, 0.5);
+  border-radius: 4px;
+}
+
+.json::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+
+.json::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
