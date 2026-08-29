@@ -266,13 +266,18 @@ textarea {
 .json {
   margin: 0;
   overflow: auto;
+<<<<<<< HEAD
   white-space: pre;
+=======
+  white-space: pre-wrap;
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
   word-break: break-word;
   background: rgba(10, 30, 20, 0.7);
   padding: 18px;
   border-radius: 10px;
   border: 1px solid rgba(40, 80, 60, 0.4);
   color: #d8ecd4;
+<<<<<<< HEAD
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 13px;
   line-height: 1.6;
@@ -291,6 +296,10 @@ textarea {
 .json .json-line.depth-4 { border-left-color: rgba(100, 180, 130, 0.5); }
 .json .json-line.depth-5 { border-left-color: rgba(100, 180, 130, 0.6); }
 
+=======
+}
+
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));

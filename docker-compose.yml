@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 networks:
   monitoring:
     external: true
@@ -13,3 +14,30 @@ services:
       - "3000:3000"
     networks:
       - monitoring
+=======
+services:
+  iiko-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    image: iiko-api:latest
+    container_name: iiko-api
+    restart: unless-stopped
+    ports:
+     - "3000:3000"
+    env_file:
+      - .env
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3000/
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904

@@ -76,6 +76,7 @@ function field(name, label, type = 'text', value = '', hint = '') {
   return `<label class="field" style="margin-bottom: 8px;">${label}<input name="${name}" type="${type}" value="${esc(value)}" style="width: 100%;" required></label>${hint ? `<p class="hint">${hint}</p>` : ''}`;
 }
 
+<<<<<<< HEAD
 function formatJsonWithLines(json, indent = 2) {
   if (typeof json !== 'string') {
     json = JSON.stringify(json, null, indent);
@@ -123,6 +124,8 @@ function formatJsonWithLines(json, indent = 2) {
   return result.join('\n');
 }
 
+=======
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
 function render() {
   $('#tabs').innerHTML = Object.entries(labels).map(([key, label]) => 
     `<button data-tab="${key}" class="${key === state.tab ? 'active' : ''}">${label}</button>`
@@ -373,12 +376,16 @@ function formatPrice(price) {
 
 function cardHtml(rows) {
   if (!rows.length) return '<div class="empty">Ничего не найдено.</div>';
+<<<<<<< HEAD
   
+=======
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
   return rows.map(row => {
     const raw = row.__raw;
     const display = Object.fromEntries(Object.entries(row).filter(([k]) => k !== '__raw'));
     const clickable = hasProductModifiers(raw);
     const rawId = raw && (raw.itemId || raw.id);
+<<<<<<< HEAD
     
     return `<article class="card" style="cursor: ${clickable ? 'pointer' : 'default'};"
         ${clickable ? `onclick="openProductCard('${esc(rawId)}')" title="Кликните для просмотра модификаторов"` : ''}>
@@ -392,6 +399,17 @@ function cardHtml(rows) {
           return `<dt>${esc(k)}</dt><dd${isPrice ? ' style="font-weight: 700; color: var(--accent); font-size: 16px;"' : ''}>${esc(displayValue)}</dd>`;
         }).join('')}
       </dl>
+=======
+    return `<article class="card" style="cursor: ${clickable ? 'pointer' : 'default'};"
+        ${clickable ? `onclick="openProductCard('${esc(rawId)}')" title="Кликните для просмотра модификаторов"` : ''}>
+      <dl>${Object.entries(display).map(([k, v]) => {
+        let displayValue = v;
+        if (k === 'Цена' && v !== '—' && v !== 'null') {
+          displayValue = formatPrice(parseFloat(v));
+        }
+        return `<dt>${esc(k)}</dt><dd>${esc(displayValue)}</dd>`;
+      }).join('')}</dl>
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
       ${clickable ? `<div style="margin-top: 8px; color: var(--accent); font-size: 12px;">🔍 Нажмите для просмотра модификаторов</div>` : ''}
     </article>`;
   }).join('');
@@ -683,6 +701,7 @@ function renderResult() {
     // Сохраняем позиции всех совпадений
     jsonSearchResults = [];
     let jsonStr = lastJson;
+<<<<<<< HEAD
     
     // Форматируем с линиями
     let formattedJson = formatJsonWithLines(lastJson);
@@ -692,6 +711,18 @@ function renderResult() {
       let match;
       let lastPos = 0;
       let matches = [];
+=======
+    if (q) {
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      let match;
+      let lastIndex = 0;
+      let parts = [];
+      let matchIndex = 0;
+      
+      // Находим все совпадения и сохраняем их позиции
+      const matches = [];
+      let tempStr = lastJson;
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
       const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = searchRegex.exec(lastJson)) !== null) {
         matches.push({
@@ -701,7 +732,11 @@ function renderResult() {
         });
       }
       
+<<<<<<< HEAD
       // Строим строку с подсветкой на основе форматированного JSON
+=======
+      // Строим строку с подсветкой
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
       let highlighted = '';
       let pos = 0;
       matches.forEach((m, i) => {
@@ -710,6 +745,7 @@ function renderResult() {
         pos = m.index + m.length;
       });
       highlighted += esc(lastJson.substring(pos));
+<<<<<<< HEAD
       
       // Применяем подсветку к форматированному JSON с линиями
       let finalHighlighted = formatJsonWithLines(highlighted);
@@ -720,6 +756,13 @@ function renderResult() {
     }
     
     el.innerHTML = `<span class="status ${ok ? '' : 'bad'}">${status} ${ok ? '✅ УСПЕХ' : '❌ ОШИБКА'}</span>${searchHtml}<pre class="json" id="jsonContainer" style="white-space: pre; word-break: break-word; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.6;">${jsonStr}</pre>`;
+=======
+      jsonStr = highlighted;
+      jsonSearchResults = matches;
+    }
+    
+    el.innerHTML = `<span class="status ${ok ? '' : 'bad'}">${status} ${ok ? '✅ УСПЕХ' : '❌ ОШИБКА'}</span>${searchHtml}<pre class="json" id="jsonContainer" style="white-space: pre-wrap; word-break: break-word;">${jsonStr}</pre>`;
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
     
     // Обновляем счетчики
     if (q) {
@@ -1615,9 +1658,13 @@ document.addEventListener('input', e => {
           pos = m.index + m.length;
         });
         highlighted += esc(lastJson.substring(pos));
+<<<<<<< HEAD
         // Применяем форматирование с линиями
         let finalHighlighted = formatJsonWithLines(highlighted);
         pre.innerHTML = finalHighlighted;
+=======
+        pre.innerHTML = highlighted;
+>>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
         jsonSearchResults = matches;
         
         // Обновляем счетчики
