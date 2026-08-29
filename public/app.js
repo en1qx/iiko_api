@@ -76,56 +76,22 @@ function field(name, label, type = 'text', value = '', hint = '') {
   return `<label class="field" style="margin-bottom: 8px;">${label}<input name="${name}" type="${type}" value="${esc(value)}" style="width: 100%;" required></label>${hint ? `<p class="hint">${hint}</p>` : ''}`;
 }
 
-<<<<<<< HEAD
+// Функция форматирования JSON с линиями (упрощённая, без палок)
 function formatJsonWithLines(json, indent = 2) {
   if (typeof json !== 'string') {
     json = JSON.stringify(json, null, indent);
   }
-  
-  let lines = json.split('\n');
-  let result = [];
-  let depth = 0;
-  
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    let trimmed = line.trim();
-    
-    let closes = (trimmed.startsWith('}') || trimmed.startsWith(']')) && 
-                 !trimmed.startsWith('{') && !trimmed.startsWith('[');
-    
-    let opens = (trimmed.endsWith('{') || trimmed.endsWith('[')) && 
-                !trimmed.endsWith('}') && !trimmed.endsWith(']');
-    
-    let currentDepth = depth;
-    if (closes) {
-      currentDepth = Math.max(0, depth - 1);
-    }
-    
-    let prefix = '';
-    if (currentDepth > 0) {
-      let isClosing = trimmed === '}' || trimmed === ']' || 
-                     trimmed === '},' || trimmed === '],' ||
-                     trimmed.startsWith('}') || trimmed.startsWith(']');
-      
-      let lineChar = isClosing ? '│' : '│';
-      prefix = ' '.repeat(currentDepth * indent) + ' ' + lineChar;
-    }
-    
-    result.push(prefix + line);
-    
-    if (opens) {
-      depth++;
-    }
-    if (closes) {
-      depth = Math.max(0, depth - 1);
-    }
-  }
-  
-  return result.join('\n');
+  return json; // Просто возвращаем обычный JSON без линий
 }
 
-=======
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
+// Функция подсветки price в JSON
+function highlightPriceInJson(jsonStr) {
+  // Ищем "price": число или "price": "число" и выделяем
+  return jsonStr.replace(/"price"\s*:\s*([0-9.]+)/gi, (match, price) => {
+    return `<span style="color: var(--accent); font-weight: 700; background: rgba(183, 216, 167, 0.15); padding: 0 4px; border-radius: 3px;">"price": ${price}</span>`;
+  });
+}
+
 function render() {
   $('#tabs').innerHTML = Object.entries(labels).map(([key, label]) => 
     `<button data-tab="${key}" class="${key === state.tab ? 'active' : ''}">${label}</button>`
@@ -295,7 +261,11 @@ function saveChoices(data) {
   if (state.tab === 'transport') {
     if (state.action === 'organizations') {
       state.values.organizations = collect(data, ['id','organizationId']);
-      if (state.values.organizations.length > 0) {
+      if (state.values.organizations.length > 0 && !state.selectedOrg) {
+        state.selectedOrg = state.values.organizations[0].id;
+      }
+      const stillExists = state.values.organizations.some(org => org.id === state.selectedOrg);
+      if (!stillExists && state.values.organizations.length > 0) {
         state.selectedOrg = state.values.organizations[0].id;
       }
     }
@@ -314,6 +284,9 @@ function saveChoices(data) {
       state.terminalGroupsMap = map;
     }
     if (state.action === 'externalMenus') { 
+      const oldMenuId = state.selectedMenu;
+      const oldPriceCategoryId = state.selectedPriceCategory;
+      
       state.values.menus = (data.externalMenus || []).map(x => {
         const id = String(x.id);
         const cleanId = id.includes('#') ? id.split('#')[0] : id;
@@ -323,17 +296,30 @@ function saveChoices(data) {
         id: String(x.id), 
         label: x.name || x.id
       }));
-      if (state.values.menus.length === 1) {
+      
+      const menuStillExists = state.values.menus.some(m => m.id === oldMenuId);
+      if (menuStillExists) {
+        state.selectedMenu = oldMenuId;
+      } else if (state.values.menus.length > 0) {
         state.selectedMenu = state.values.menus[0].id;
       }
-      if (state.values.priceCategories.length === 1) {
+      
+      const priceStillExists = state.values.priceCategories.some(p => p.id === oldPriceCategoryId);
+      if (priceStillExists) {
+        state.selectedPriceCategory = oldPriceCategoryId;
+      } else if (state.values.priceCategories.length > 0) {
         state.selectedPriceCategory = state.values.priceCategories[0].id;
       }
+      
       render();
     }
   } else if (state.action === 'restaurants') {
     state.values[`${state.tab}Restaurants`] = collect(data, ['id','restaurantId']);
-    if (state.values[`${state.tab}Restaurants`].length > 0) {
+    if (state.values[`${state.tab}Restaurants`].length > 0 && !state.selectedRestaurant) {
+      state.selectedRestaurant = state.values[`${state.tab}Restaurants`][0].id;
+    }
+    const stillExists = state.values[`${state.tab}Restaurants`].some(r => r.id === state.selectedRestaurant);
+    if (!stillExists && state.values[`${state.tab}Restaurants`].length > 0) {
       state.selectedRestaurant = state.values[`${state.tab}Restaurants`][0].id;
     }
   }
@@ -376,18 +362,15 @@ function formatPrice(price) {
 
 function cardHtml(rows) {
   if (!rows.length) return '<div class="empty">Ничего не найдено.</div>';
-<<<<<<< HEAD
   
-=======
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
   return rows.map(row => {
     const raw = row.__raw;
-    const display = Object.fromEntries(Object.entries(row).filter(([k]) => k !== '__raw'));
-    const clickable = hasProductModifiers(raw);
+    const display = Object.fromEntries(Object.entries(row).filter(([k]) => k !== '__raw' && k !== '_isModifier' && k !== '_hasModifiers'));
+    const clickable = hasProductModifiers(raw) || row._hasModifiers;
     const rawId = raw && (raw.itemId || raw.id);
-<<<<<<< HEAD
+    const isModifier = row._isModifier;
     
-    return `<article class="card" style="cursor: ${clickable ? 'pointer' : 'default'};"
+    return `<article class="card" style="cursor: ${clickable ? 'pointer' : 'default'}; ${isModifier ? 'border-color: var(--accent2); border-width: 2px;' : ''}"
         ${clickable ? `onclick="openProductCard('${esc(rawId)}')" title="Кликните для просмотра модификаторов"` : ''}>
       <dl>
         ${Object.entries(display).map(([k, v]) => {
@@ -396,23 +379,14 @@ function cardHtml(rows) {
             displayValue = formatPrice(parseFloat(v));
           }
           const isPrice = k === 'Цена';
-          return `<dt>${esc(k)}</dt><dd${isPrice ? ' style="font-weight: 700; color: var(--accent); font-size: 16px;"' : ''}>${esc(displayValue)}</dd>`;
+          const isType = k === 'Тип';
+          return `<dt>${esc(k)}</dt><dd${isPrice ? ' style="font-weight: 700; color: var(--accent); font-size: 16px;"' : ''}${isType ? ' style="font-size: 12px; color: var(--accent2);"' : ''}>${esc(displayValue)}</dd>`;
         }).join('')}
       </dl>
-=======
-    return `<article class="card" style="cursor: ${clickable ? 'pointer' : 'default'};"
-        ${clickable ? `onclick="openProductCard('${esc(rawId)}')" title="Кликните для просмотра модификаторов"` : ''}>
-      <dl>${Object.entries(display).map(([k, v]) => {
-        let displayValue = v;
-        if (k === 'Цена' && v !== '—' && v !== 'null') {
-          displayValue = formatPrice(parseFloat(v));
-        }
-        return `<dt>${esc(k)}</dt><dd>${esc(displayValue)}</dd>`;
-      }).join('')}</dl>
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
-      ${clickable ? `<div style="margin-top: 8px; color: var(--accent); font-size: 12px;">🔍 Нажмите для просмотра модификаторов</div>` : ''}
+      ${isModifier ? `<div style="margin-top: 8px; color: var(--accent2); font-size: 11px;">⚡ Элемент модификатора</div>` : ''}
+      ${clickable && !isModifier ? `<div style="margin-top: 8px; color: var(--accent); font-size: 12px;">🔍 Нажмите для просмотра модификаторов</div>` : ''}
     </article>`;
-  }).join('');
+  }).filter(Boolean).join('');
 }
 
 function renderProductCard(product) {
@@ -424,7 +398,7 @@ function renderProductCard(product) {
         <h3 style="margin: 0 0 8px; color: var(--accent);">${esc(product.name || 'Без названия')}</h3>
         <div style="color: var(--muted); font-size: 13px;">
           <div><b>ID:</b> ${esc(product.itemId || product.id || '—')}</div>
-          <div><b>Цена:</b> ${formatPrice(product.price ?? product.currentPrice ?? product.defaultPrice ?? null)}</div>
+          <div><b>Цена:</b> <span style="font-weight: 700; color: var(--accent); font-size: 16px;">${formatPrice(product.price ?? product.currentPrice ?? product.defaultPrice ?? null)}</span></div>
           ${product.code ? `<div><b>Код:</b> ${esc(product.code)}</div>` : ''}
           ${product.articleNumber ? `<div><b>Артикул:</b> ${esc(product.articleNumber)}</div>` : ''}
           ${product.sku ? `<div><b>Артикул:</b> ${esc(product.sku)}</div>` : ''}
@@ -454,7 +428,7 @@ function renderProductCard(product) {
   
   let modifierGroups = [];
   
-  if (product.itemSizes && product.itemSizes.length > 0) {
+  if (product.itemSizes && Array.isArray(product.itemSizes)) {
     product.itemSizes.forEach(size => {
       if (size.itemModifierGroups && Array.isArray(size.itemModifierGroups)) {
         modifierGroups = modifierGroups.concat(size.itemModifierGroups);
@@ -701,28 +675,15 @@ function renderResult() {
     // Сохраняем позиции всех совпадений
     jsonSearchResults = [];
     let jsonStr = lastJson;
-<<<<<<< HEAD
     
-    // Форматируем с линиями
-    let formattedJson = formatJsonWithLines(lastJson);
+    // Подсвечиваем price
+    let highlightedPriceJson = highlightPriceInJson(lastJson);
     
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       let match;
       let lastPos = 0;
       let matches = [];
-=======
-    if (q) {
-      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-      let match;
-      let lastIndex = 0;
-      let parts = [];
-      let matchIndex = 0;
-      
-      // Находим все совпадения и сохраняем их позиции
-      const matches = [];
-      let tempStr = lastJson;
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
       const searchRegex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       while ((match = searchRegex.exec(lastJson)) !== null) {
         matches.push({
@@ -732,11 +693,7 @@ function renderResult() {
         });
       }
       
-<<<<<<< HEAD
-      // Строим строку с подсветкой на основе форматированного JSON
-=======
       // Строим строку с подсветкой
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
       let highlighted = '';
       let pos = 0;
       matches.forEach((m, i) => {
@@ -745,24 +702,16 @@ function renderResult() {
         pos = m.index + m.length;
       });
       highlighted += esc(lastJson.substring(pos));
-<<<<<<< HEAD
       
-      // Применяем подсветку к форматированному JSON с линиями
-      let finalHighlighted = formatJsonWithLines(highlighted);
+      // Подсвечиваем price
+      let finalHighlighted = highlightPriceInJson(highlighted);
       jsonStr = finalHighlighted;
       jsonSearchResults = matches;
     } else {
-      jsonStr = formattedJson;
+      jsonStr = highlightedPriceJson;
     }
     
     el.innerHTML = `<span class="status ${ok ? '' : 'bad'}">${status} ${ok ? '✅ УСПЕХ' : '❌ ОШИБКА'}</span>${searchHtml}<pre class="json" id="jsonContainer" style="white-space: pre; word-break: break-word; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.6;">${jsonStr}</pre>`;
-=======
-      jsonStr = highlighted;
-      jsonSearchResults = matches;
-    }
-    
-    el.innerHTML = `<span class="status ${ok ? '' : 'bad'}">${status} ${ok ? '✅ УСПЕХ' : '❌ ОШИБКА'}</span>${searchHtml}<pre class="json" id="jsonContainer" style="white-space: pre-wrap; word-break: break-word;">${jsonStr}</pre>`;
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
     
     // Обновляем счетчики
     if (q) {
@@ -779,7 +728,7 @@ function renderResult() {
   }
   
   try {
-    let rows = lastRows.filter(x => Object.entries(x).filter(([k]) => k !== '__raw').map(([, v]) => String(v)).join(' ').toLowerCase().includes(q));
+    let rows = lastRows.filter(x => Object.entries(x).filter(([k]) => k !== '__raw' && k !== '_hasModifiers').map(([, v]) => String(v)).join(' ').toLowerCase().includes(q));
     const cardHtmlStr = cardHtml(rows);
     el.innerHTML = `<span class="status ${ok ? '' : 'bad'}">${status} ${ok ? '✅ УСПЕХ' : '❌ ОШИБКА'}</span>${searchHtml}
       <div class="cards">${cardHtmlStr}</div>`;
@@ -857,85 +806,157 @@ function _rows(d) {
     return (d.externalMenus || []).map(x => ({'Название': x.name, 'ID внешнего меню': x.id}));
   
   if (t === 'transport' && a === 'externalMenu') {
-    const products = [];
-    
-    if (d.itemCategories && Array.isArray(d.itemCategories)) {
-      d.itemCategories.forEach(category => {
-        if (category.items && Array.isArray(category.items)) {
-          category.items.forEach(item => {
-            if (item.itemSizes && Array.isArray(item.itemSizes) && item.itemSizes.length > 0) {
-              item.itemSizes.forEach(size => {
-                let price = null;
-                if (size.prices && Array.isArray(size.prices) && size.prices.length > 0) {
-                  price = size.prices[0].price;
-                }
-                
-                products.push({
-                  'Название блюда': item.name || 'Без названия',
-                  'Размер': size.sizeName || size.sizeCode || 'Стандартный',
-                  'Цена': price,
-                  'ID': item.itemId || item.id || '—',
-                  'Артикул': size.sku || item.sku || '—',
-                  'Категория': category.name || '—',
-                  '__raw': item
-                });
-              });
-            } else {
-              let price = null;
-              if (item.prices && Array.isArray(item.prices) && item.prices.length > 0) {
-                price = item.prices[0].price;
-              }
-              
-              products.push({
-                'Название блюда': item.name || 'Без названия',
-                'Цена': price,
-                'ID': item.itemId || item.id || '—',
-                'Артикул': item.sku || '—',
-                'Категория': category.name || '—',
-                '__raw': item
-              });
-            }
-          });
+  const products = [];
+  
+  const hasModifiers = (item) => {
+    if (!item) return false;
+    if (item.itemSizes && Array.isArray(item.itemSizes)) {
+      for (const size of item.itemSizes) {
+        if (size.itemModifierGroups && size.itemModifierGroups.length > 0) {
+          return true;
         }
-      });
-    }
-    
-    if (products.length === 0) {
-      if (d.products && Array.isArray(d.products)) {
-        d.products.forEach(item => {
-          products.push({
-            'Название блюда': item.name || 'Без названия',
-            'Цена': item.price ?? null,
-            'ID': item.id || '—',
-            'Артикул': item.sku || item.articleNumber || '—',
-            '__raw': item
-          });
-        });
-      } else if (d.items && Array.isArray(d.items)) {
-        d.items.forEach(item => {
-          products.push({
-            'Название блюда': item.name || 'Без названия',
-            'Цена': item.price ?? null,
-            'ID': item.id || '—',
-            'Артикул': item.sku || item.articleNumber || '—',
-            '__raw': item
-          });
-        });
-      } else if (Array.isArray(d)) {
-        d.forEach(item => {
-          products.push({
-            'Название блюда': item.name || 'Без названия',
-            'Цена': item.price ?? null,
-            'ID': item.id || '—',
-            'Артикул': item.sku || item.articleNumber || '—',
-            '__raw': item
-          });
-        });
       }
     }
+    if (item.modifierGroups && item.modifierGroups.length > 0) return true;
+    if (item.modifiers && item.modifiers.length > 0) return true;
+    return false;
+  };
+  
+  const collectModifiers = (modifierGroup, categoryName) => {
+    const modifiers = modifierGroup.items || modifierGroup.modifiers || [];
+    modifiers.forEach(mod => {
+      let price = null;
+      if (mod.price !== undefined && mod.price !== null) {
+        price = mod.price;
+      } else if (mod.amount !== undefined && mod.amount !== null) {
+        price = mod.amount;
+      } else if (mod.prices && Array.isArray(mod.prices) && mod.prices.length > 0) {
+        price = mod.prices[0].price;
+      }
+      
+      products.push({
+        'Название блюда': mod.name || mod.id || 'Модификатор',
+        'Цена': price,
+        'ID': mod.itemId || mod.id || '—',
+        'Артикул': mod.sku || '—',
+        'Категория': categoryName || '—',
+        'Тип': '🔧 Модификатор',
+        '__raw': mod,
+        '_isModifier': true,
+        '_hasModifiers': false
+      });
+    });
+  };
+  
+  const processItems = (items, categoryName) => {
+    if (!items || !Array.isArray(items)) return;
     
-    return products;
+    items.forEach(item => {
+      const itemType = item.type || '';
+      
+      if (itemType === 'Modifier' || itemType === 'MODIFIER') {
+        let price = null;
+        if (item.price !== undefined && item.price !== null) {
+          price = item.price;
+        } else if (item.prices && Array.isArray(item.prices) && item.prices.length > 0) {
+          price = item.prices[0].price;
+        }
+        
+        products.push({
+          'Название блюда': item.name || 'Модификатор',
+          'Цена': price,
+          'ID': item.itemId || item.id || '—',
+          'Артикул': item.sku || '—',
+          'Категория': categoryName || '—',
+          'Тип': '🔧 Модификатор',
+          '__raw': item,
+          '_isModifier': true,
+          '_hasModifiers': false
+        });
+        return;
+      }
+      
+      const hasMods = hasModifiers(item);
+      
+      if (item.itemSizes && Array.isArray(item.itemSizes) && item.itemSizes.length > 0) {
+        item.itemSizes.forEach(size => {
+          let price = null;
+          if (size.prices && Array.isArray(size.prices) && size.prices.length > 0) {
+            price = size.prices[0].price;
+          }
+          
+          products.push({
+            'Название блюда': item.name || 'Без названия',
+            'Размер': size.sizeName || size.sizeCode || 'Стандартный',
+            'Цена': price,
+            'ID': item.itemId || item.id || '—',
+            'Артикул': size.sku || item.sku || '—',
+            'Категория': categoryName || '—',
+            'Тип': hasMods ? '🔧 С модификаторами' : '🍽️ Блюдо',
+            '__raw': item,
+            '_isModifier': false,
+            '_hasModifiers': hasMods
+          });
+        });
+      } else {
+        let price = null;
+        if (item.prices && Array.isArray(item.prices) && item.prices.length > 0) {
+          price = item.prices[0].price;
+        }
+        
+        products.push({
+          'Название блюда': item.name || 'Без названия',
+          'Цена': price,
+          'ID': item.itemId || item.id || '—',
+          'Артикул': item.sku || '—',
+          'Категория': categoryName || '—',
+          'Тип': hasMods ? '🔧 С модификаторами' : '🍽️ Блюдо',
+          '__raw': item,
+          '_isModifier': false,
+          '_hasModifiers': hasMods
+        });
+      }
+      
+      if (item.itemSizes && Array.isArray(item.itemSizes)) {
+        item.itemSizes.forEach(size => {
+          if (size.itemModifierGroups && Array.isArray(size.itemModifierGroups)) {
+            size.itemModifierGroups.forEach(group => {
+              collectModifiers(group, categoryName);
+            });
+          }
+        });
+      }
+      
+      if (item.modifierGroups && Array.isArray(item.modifierGroups)) {
+        item.modifierGroups.forEach(group => {
+          collectModifiers(group, categoryName);
+        });
+      }
+      
+      if (item.modifiers && Array.isArray(item.modifiers)) {
+        collectModifiers({ items: item.modifiers }, categoryName);
+      }
+    });
+  };
+  
+  if (d.itemCategories && Array.isArray(d.itemCategories)) {
+    d.itemCategories.forEach(category => {
+      processItems(category.items, category.name);
+    });
   }
+  
+  if (products.length === 0) {
+    if (d.products && Array.isArray(d.products)) {
+      processItems(d.products, 'Без категории');
+    } else if (d.items && Array.isArray(d.items)) {
+      processItems(d.items, 'Без категории');
+    } else if (Array.isArray(d)) {
+      processItems(d, 'Без категории');
+    }
+  }
+  
+  return products;
+}
   
   if (t === 'transport' && a === 'stopLists') {
     const allItems = [];
@@ -1658,13 +1679,10 @@ document.addEventListener('input', e => {
           pos = m.index + m.length;
         });
         highlighted += esc(lastJson.substring(pos));
-<<<<<<< HEAD
-        // Применяем форматирование с линиями
-        let finalHighlighted = formatJsonWithLines(highlighted);
+        
+        // Подсвечиваем price
+        let finalHighlighted = highlightPriceInJson(highlighted);
         pre.innerHTML = finalHighlighted;
-=======
-        pre.innerHTML = highlighted;
->>>>>>> e61a2bf94a89114555141d6e1cd479abee03b904
         jsonSearchResults = matches;
         
         // Обновляем счетчики
@@ -1689,7 +1707,7 @@ document.addEventListener('input', e => {
     
     const cardsContainer = el.querySelector('.cards');
     if (cardsContainer) {
-      let rows = lastRows.filter(x => Object.entries(x).filter(([k]) => k !== '__raw').map(([, v]) => String(v)).join(' ').toLowerCase().includes(q));
+      let rows = lastRows.filter(x => Object.entries(x).filter(([k]) => k !== '__raw' && k !== '_hasModifiers').map(([, v]) => String(v)).join(' ').toLowerCase().includes(q));
       cardsContainer.innerHTML = cardHtml(rows);
     }
     return;
@@ -1717,7 +1735,6 @@ document.addEventListener('keydown', (e) => {
       navigateSearch('prev');
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      // При Enter переходим к следующему результату
       if (jsonSearchResults.length > 0) {
         navigateSearch('next');
       }

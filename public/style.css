@@ -263,7 +263,7 @@ textarea {
   color: #a8d0e8;
 }
 
-/* JSON стили с линиями */
+/* JSON стили */
 .json {
   margin: 0;
   overflow: auto;
@@ -278,36 +278,6 @@ textarea {
   font-size: 13px;
   line-height: 1.6;
   tab-size: 2;
-}
-
-.json .json-line {
-  display: block;
-  padding: 0 4px;
-  border-left: 1px solid rgba(100, 180, 130, 0.15);
-}
-
-.json .json-line.depth-1 { border-left-color: rgba(100, 180, 130, 0.2); }
-.json .json-line.depth-2 { border-left-color: rgba(100, 180, 130, 0.3); }
-.json .json-line.depth-3 { border-left-color: rgba(100, 180, 130, 0.4); }
-.json .json-line.depth-4 { border-left-color: rgba(100, 180, 130, 0.5); }
-.json .json-line.depth-5 { border-left-color: rgba(100, 180, 130, 0.6); }
-.json .json-line.depth-6 { border-left-color: rgba(100, 180, 130, 0.7); }
-.json .json-line.depth-7 { border-left-color: rgba(100, 180, 130, 0.8); }
-.json .json-line.depth-8 { border-left-color: rgba(100, 180, 130, 0.9); }
-
-/* Подсветка совпадений в JSON */
-.json-match {
-  background: #ffeb3b;
-  color: #000;
-  padding: 0 2px;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.json-match:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
 }
 
 /* Карточки */
@@ -347,13 +317,6 @@ textarea {
 .card dd { 
   margin: 1px 0; 
   word-break: break-word; 
-}
-
-/* Выделение цены жирным */
-.card dd.price-highlight {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 16px;
 }
 
 /* Загрузка */
@@ -562,4 +525,28 @@ hr {
 
 .json::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
+}
+
+/* Подсветка price в JSON */
+.json .price-highlight {
+  color: var(--accent);
+  font-weight: 700;
+  background: rgba(183, 216, 167, 0.15);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+/* Подсветка совпадений в JSON */
+.json-match {
+  background: #ffeb3b;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.json-match:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
 }
