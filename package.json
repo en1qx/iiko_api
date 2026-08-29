@@ -1,0 +1,9 @@
+{
+  "name": "iiko-api",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Small browser panel for iiko, Yandex Food and Magnit integration APIs",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
